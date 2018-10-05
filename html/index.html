@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <script type="application/javascript">
+    class datapoint {
+      constructor(y, timepoint) {
+        this.x = 1000;
+        this.y = y;
+        this.mytime = timepoint;
+      }
+    }
+
+    var chatSocket = new WebSocket('ws://' + window.location.host + '/feed');
+
+    chatSocket.onmessage = function(e) {
+        let data = e.data;
+        datapoints.push(new datapoint(data, Date.now()))
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Websocket closed unexpectedly');
+    };
+
+    var datapoints = [];
+
+    function init() {
+      window.requestAnimationFrame(draw);
+    }
+    function add_and_draw() {
+      datapoints.push(new datapoint(40, Date.now()))
+    }
+    function draw() {
+      let ctx = document.getElementById('canvas').getContext('2d');
+      // calc state
+      datapoints = datapoints.filter(el => el.x>0).map(el => {el.x=1000-(Date.now()-el.mytime)/10;return el})
+      //clear
+      ctx.clearRect(0, 0, 1100, 150);
+      //draw
+      ctx.fillStyle = 'rgb(255,4,255)';
+      datapoints.forEach(el=>ctx.fillRect(el.x, el.y, 5, 5))
+      
+      Array.from(Array(11).keys()) .forEach((el) => {
+        ctx.fillText(el, 997.5-(el*100), 150)
+        ctx.fillRect(1000-(el*100), 0, 1,140)
+      })
+      
+      //request more frames
+      window.requestAnimationFrame(draw)
+    }
+    init();
+  </script>
+ </head>
+ <body>
+   <canvas id="canvas" width="1100" height="150"></canvas>
+ </body>
+</html>
