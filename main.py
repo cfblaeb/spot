@@ -23,7 +23,7 @@ async def polling():
     while True:
         await asleep(0.01)
         if sensor.get_sensor_data():
-            meas = {'temperature':sensor.data.temperature, 'pressure':sensor.data.pressure, 'humidity':sensor.data.humidity, 'ts':time(), 'date': datetime.now()}
+            meas = {'temperature':sensor.data.temperature, 'pressure':sensor.data.pressure, 'humidity':sensor.data.humidity, 'ts':time(), 'date': str(datetime.now())}
             if len(measurements) > 10000:
                 #write to file and empty
                 #then remove all old values
