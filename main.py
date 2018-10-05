@@ -1,5 +1,5 @@
 from sanic import Sanic
-from sanic.response import json
+from json import dumps
 from asyncio import sleep as asleep
 import bme680
 
@@ -8,19 +8,20 @@ measurements = []
 app = Sanic()
 
 app.static('/', './html/index.html')
+app.static('/spot.js', './js/spot.js')
 
 @app.websocket('/feed')
 async def feed(request, ws):
     while True:
         await asleep(0.1)
-        await ws.send(str(measurements[-1]))
+        await ws.send(dumps(measurements[-1]))
 
 async def polling():
     global measurements
     while True:
         await asleep(0.01)
         if sensor.get_sensor_data():
-            meas = sensor.data.temperature
+            meas = {'temperature':sensor.data.temperature, 'pressure':sensor.data.pressure, 'humidity':sensor.data.humidity}
             if len(measurements) > 10000:
                 #write to file and empty
                 #then remove all old values
