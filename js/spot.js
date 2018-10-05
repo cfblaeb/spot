@@ -37,7 +37,7 @@ chatSocket.onmessage = function(e) {
 		server_client_time_offset = Date.now()-data["ts"]*1000
 	}
 	for (let key of Object.keys(data_streams)) {
-		data_streams[key][3].push(new datapoint(data[key], data["ts"]*1000))
+		data_streams[key][3].push(new datapoint(data[key], data["ts"]*1000-server_client_time_offset))
 	}
 }
 
@@ -49,7 +49,7 @@ function draw() {
 	for (let key of Object.keys(data_streams)) {
 		let ctx = data_streams[key][2].getContext("2d")
 		data_streams[key][3] = data_streams[key][3].filter(
-			el => el.x>0).map(el => {el.x=canvas_size[0]-(Date.now()-el.mytime-server_client_time_offset)/10;return el})
+			el => el.x>0).map(el => {el.x=canvas_size[0]-(Date.now()-el.mytime)/10;return el})
 		ctx.clearRect(0, 0, canvas_size[0]-width_buffer, canvas_size[1])
 		//vertical
 		Array.from(Array(11).keys()) .forEach((el) => {
