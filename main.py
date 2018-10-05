@@ -1,8 +1,9 @@
 from sanic import Sanic
 from sanic.response import json
 from asyncio import sleep as asleep
-from random import randint
+import bme680
 
+sensor = bme680.BME680()
 measurements = []
 app = Sanic()
 
@@ -18,19 +19,14 @@ async def polling():
     global measurements
     while True:
         await asleep(0.01)
-        if len(measurements) != 0:
-            nn = measurements[-1]+randint(0, 10)-5
-        else:
-            nn = 50
-        if nn > 100:
-            nn = 100
-        elif nn < 0:
-            nn = 0
-        if len(measurements) > 10000:
-            #write to file and empty
-            #then remove all old values
-            measurements = [measurements[-1]]
-        measurements.append(nn)
+        if sensor.get_sensor_data():
+            meas = sensor.data.temperature
+            if len(measurements) > 10000:
+                #write to file and empty
+                #then remove all old values
+                measurements = [meas]
+            else:
+                measurements.append(meas)
 
 
 app.add_task(polling())
