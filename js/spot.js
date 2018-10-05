@@ -34,10 +34,10 @@ var chatSocket = new WebSocket("ws://" + window.location.host + "/feed")
 chatSocket.onmessage = function(e) {
 	let data = JSON.parse(e.data)
 	if (server_client_time_offset === "NOTSET") {
-		server_client_time_offset = Date.now()-data["ts"]
+		server_client_time_offset = Date.now()-data["ts"]*1000
 	}
 	for (let key of Object.keys(data_streams)) {
-		data_streams[key][3].push(new datapoint(data[key], data["ts"]))
+		data_streams[key][3].push(new datapoint(data[key], data["ts"]*1000))
 	}
 }
 
