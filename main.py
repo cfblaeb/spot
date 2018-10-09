@@ -5,38 +5,40 @@ from time import time
 from datetime import datetime
 import bme680
 
-sensor = bme680.BME680()
-measurements = []
+#sensor = bme680.BME680()
 app = Sanic()
+measurement = {}
 
 app.static('/', './html/index.html')
 app.static('/spot.js', './js/spot.js')
+app.static('/favicon.ico', './img/favicon.ico')
 
 @app.websocket('/feed')
 async def feed(request, ws):
     while True:
-        await asleep(0.1)
-        await ws.send(dumps(measurements[-1]))
+        await asleep(0.05)
+        if True:#sensor.get_sensor_data():
+            await ws.send(dumps(measurement))
 
 async def polling():
-    global measurements
+    global measurement
+    last_time = time()
     while True:
         await asleep(0.01)
-        if sensor.get_sensor_data():
-            meas = {
-                'temperature':sensor.data.temperature, 
-                'pressure':sensor.data.pressure, 
-                'humidity':sensor.data.humidity, 
+        if True:#sensor.get_sensor_data():
+            measurement = {
+                'temperature': 10,#sensor.data.temperature, 
+                'pressure': 1000, #sensor.data.pressure, 
+                'humidity':50, #sensor.data.humidity, 
                 'ts':time(), 
                 'date': str(datetime.now())
                 }
-            if len(measurements) > 10000:
-                #write to file and empty
-                #then remove all old values
-                measurements = [meas]
-            else:
-                measurements.append(meas)
-
+            ctime = time()
+            if ctime-last_time>60: # log once every 60 seconds
+                with open('data.log', 'a') as logfile:
+                    logfile.write(dumps(measurement))
+                    logfile.write("\n")
+                last_time = ctime
 
 app.add_task(polling())
 

@@ -68,7 +68,9 @@ function draw() {
 		ctx.fillStyle = "rgb(255,4,255)"
 		
 		
-		data_streams[key][3].forEach(el=>ctx.fillRect(el.x, canvas_size[1]-((el.y-data_streams[key][0])/scale_width)*canvas_size[1], 5, 5))
+		data_streams[key][3].forEach(
+			el=>ctx.fillRect(el.x, canvas_size[1]-((el.y-data_streams[key][0])/scale_width)*canvas_size[1], 2, 2)
+		)
 	}
     
 	//request more frames

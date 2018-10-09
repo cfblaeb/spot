@@ -25,14 +25,11 @@ It will connect to the server via [websocket](https://developer.mozilla.org/en-U
 The canvas element will feature a time scrolling view of the data
 
 # to do list
-* actually log values. 
-  * But maybe...just send the data as fast as possible to client (or like very small delay) (move code into main loop and delete polling function)
-  * then every lets say 10 seconds, record a value to file
-* Make things pretty
-  * different colors for each stream data points
-  * black grid
-  * and you know...like a little niceness around the layout
 * Make things functional and interactive
   * actually be able to set all values in javascript
   * then actually be able to modify them live (like y or x axis scale)
   * something clever with labels outside plotting area
+* Make things pretty
+  * different colors for each stream data points
+  * black grid
+  * and you know...like a little niceness around the layout
