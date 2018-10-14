@@ -22,14 +22,9 @@ The server will poll the sensor often and it will occasionally send that data vi
 ## client-side
 The server will serve 1 static html page with a [canvas](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API) element per data stream.  
 It will connect to the server via [websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) and everytime it gets a datapacket its going to plot it  
-The canvas element will feature a time scrolling view of the data
+The canvas element will feature a time scrolling view of the data powered by [charts.js] (chartjs.org)
 
 # to do list
-* Make things functional and interactive
-  * actually be able to set all values in javascript
-  * then actually be able to modify them live (like y or x axis scale)
-  * something clever with labels outside plotting area
-* Make things pretty
-  * different colors for each stream data points
-  * black grid
-  * and you know...like a little niceness around the layout
+* UI controls for setting client-side+chart options and server-side options
+* Serverside code for accepting client-sent options
+* Serverside code for connecting to a network drive for log file storage

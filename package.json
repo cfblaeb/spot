@@ -1,0 +1,28 @@
+{
+  "name": "spot",
+  "version": "1.0.0",
+  "description": "This is a little fun side project to see how hard/easy it is to make a Temperature, air pressure, humidity and \"air quality\" logger.",
+  "private": true,
+  "main": "spot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cfblaeb/spot.git"
+  },
+  "author": "Lasse Ebdrup Pedersen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cfblaeb/spot/issues"
+  },
+  "homepage": "https://github.com/cfblaeb/spot#readme",
+  "devDependencies": {
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2"
+  },
+  "dependencies": {
+    "chart.js": "^2.7.2"
+  }
+}

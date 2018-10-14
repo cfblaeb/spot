@@ -1,7 +1,7 @@
 # code settings
+
 .vscode/
-package.json
-.eslintrc.yml
+node_modules/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
