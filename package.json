@@ -6,7 +6,8 @@
   "main": "spot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack"
+    "build": "webpack",
+    "flow": "flow"
   },
   "repository": {
     "type": "git",
@@ -19,10 +20,28 @@
   },
   "homepage": "https://github.com/cfblaeb/spot#readme",
   "devDependencies": {
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2"
+    "@babel/cli": "latest",
+    "@babel/core": "latest",
+    "@babel/plugin-proposal-class-properties": "latest",
+    "@babel/preset-env": "latest",
+    "@babel/preset-flow": "latest",
+    "@babel/preset-react": "latest",
+    "babel-loader": "latest",
+    "css-loader": "latest",
+    "eslint": "latest",
+    "eslint-plugin-react": "latest",
+    "flow-bin": "latest",
+    "style-loader": "latest",
+    "webpack": "latest",
+    "webpack-cli": "latest"
   },
   "dependencies": {
-    "chart.js": "^2.7.2"
+    "@material-ui/core": "latest",
+    "@material-ui/icons": "latest",
+    "chart.js": "latest",
+    "chartjs-plugin-streaming": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-chartjs-2": "latest"
   }
 }

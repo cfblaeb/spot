@@ -16,7 +16,7 @@ To use the bme680 I just used the vendor provided library [bme680](https://githu
 I used the never recommendable, but very convenient "curl https://get.pimoroni.com/bme680 | bash" on a clean raspbian install  
 Then I installed python 3.7 using [pyenv](https://github.com/pyenv/pyenv)  
 and run 'pip install wheel' before 'pip install -r requirements.txt'  
-  
+
 I'm gonna code a little simple python webserver using [sanic](https://github.com/huge-success/sanic).  
 The server will poll the sensor often and it will occasionally send that data via [websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) to any connected clients
 ## client-side
