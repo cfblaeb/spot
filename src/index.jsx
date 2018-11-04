@@ -16,13 +16,14 @@ settingsSocket.onmessage = (e: any) => {
 	//		"pressure": {"color": "green", "plot_x": 0, "plot_y": 250, "plot_width": 1000, "plot_height": 200, "x_axis_label": "seconds", "x_axis_seconds": "10", "y_axis_label": "ehm..pressure..unit", "y_axis_from": 800, "y_axis_to": 1200, "visible": true},
 	//		"humidity": {"color": "blue", "plot_x": 0, "plot_y": 500, "plot_width": 1000, "plot_height": 200, "x_axis_label": "seconds", "x_axis_seconds": 10, "y_axis_label": "% humidity", "y_axis_from": 0, "y_axis_to": 100, "visible": true}}}*/
 
-	//server_hardware_polling_frequency: data['polling_delay'],
+	//,
 	ReactDOM.render(
 		<App
 			ref={app_ref}
 			settingsSocket={settingsSocket}
 			datastreams_meta={data['streams']}
 			server_transmit_frequency={parseInt(data['transmit_delay'])}
+			server_hardware_polling_frequency={parseInt(data['polling_delay'])}
 		/>,
 		document.getElementById('root'))
 }

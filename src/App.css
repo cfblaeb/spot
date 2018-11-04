@@ -1,11 +1,85 @@
-.App {
+body {
+	margin: 0px;
+}
+
+#settingsDiv {
+		display:flex;
+		flex-flow: column nowrap;
+		margin: 20px;
+		box-shadow: 5px 5px 20px 0px rgba(0,0,0,0.5);
+		padding: 20px;
+}
+
+.settingsClass {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+}
+
+.x_seconds_class {
+	width: 4em;
+}
+
+#titleDiv {
+	border: outset;
 	padding: 10px;
+	font-weight: bold;
 }
 
-.agraph {
-	margin: 20px;
+.active {
+	text-decoration-line: underline;
+	text-decoration-style: solid;
+	transform: translate(0px, 5px);
 }
 
-.graph_settings_class {
-	width: 100px;
+.menuButtons {
+	border-right: solid 1px black;
+	padding: 10px;
+	font-weight: bold;
+	transition-property: transform;
+	transition-duration: 0.2s;
+	cursor: pointer;
+}
+
+.menuButtons:hover {
+	transform: translate(0px, 5px);
+}
+
+#frameDiv {
+	display: flex;
+	min-height: 100vh;
+  flex-flow: column nowrap;
+}
+
+#topDiv {
+	box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.5);
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-start;
+	align-items: center;
+	min-height: 60px;
+	border-bottom: dashed 2px grey;
+}
+
+#middleDiv {
+	flex: 1;
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-evenly;
+}
+
+#bottomDiv {
+	text-align: right;
+	box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.5);
+	border-top: dashed 2px grey;
+}
+
+.graphClass {
+	box-shadow: 0px 5px 20px 0px rgba(0,0,0,0.5);
+}
+
+.graphHeader {
+	padding: 5px;
+	text-align: center;
+	text-transform: uppercase;
 }

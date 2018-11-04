@@ -25,6 +25,12 @@ It will connect to the server via [websocket](https://developer.mozilla.org/en-U
 The canvas element will feature a time scrolling view of the data powered by [charts.js] (chartjs.org)
 
 # to do list
-* UI controls for setting client-side+chart options and server-side options
-* Serverside code for accepting client-sent options
-* Serverside code for connecting to a network drive for log file storage
+* realtime
+  * offset
+* historical tab
+  * widget to select to/from date
+  * widget to select time resolution
+  * button to download viewed or all data
+* settings tab
+  * log file storage place
+  *

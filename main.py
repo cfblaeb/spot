@@ -5,7 +5,7 @@ from time import time
 from datetime import datetime
 import bme680
 
-sensor = bme680.BME680()
+#sensor = bme680.BME680()
 app = Sanic()
 measurement = {}
 
@@ -34,13 +34,27 @@ with open('status.json', 'r') as f:
 @app.websocket('/feed')
 async def feed(request, ws):
     while True:
-        await asleep(status['transmit_delay'])
-        if sensor.get_sensor_data():
+        await asleep(int(status['transmit_delay']))
+        if True: #sensor.get_sensor_data():
             await ws.send(dumps(measurement))
 
 async def consumer(mesmes, ws):
     new_data = loads(mesmes)
-    status["streams"][new_data['label']][new_data['key']] = new_data['value']
+    # remember to sanitize input!!
+    if new_data['label'] == 'root':
+        if new_data['key'] == 'polling_delay':
+            status['polling_delay'] = new_data['value']
+            if int(new_data['value']) > int(status['transmit_delay']):
+                # transmit_delay >= polling_delay
+                status['transmit_delay'] = new_data['value']
+        elif new_data['key'] == 'transmit_delay':
+            status['transmit_delay'] = new_data['value']
+            if int(new_data['value']) < int(status['polling_delay']):
+                # polling_delay <= transmit_delay
+                status['polling_delay'] = new_data['value']
+    else:
+        # TODO: sanitize input!!
+        status["streams"][new_data['label']][new_data['key']] = new_data['value']
     with open('status.json', 'w') as f:
         f.write(dumps(status))
     await ws.send(dumps(status))
@@ -52,26 +66,21 @@ async def new_settings(request, ws):
         await consumer(message, ws)
 # Some sort of code to recieve status updates
 
-
 async def polling():
     global measurement
-    last_time = time()
     while True:
-        await asleep(status['polling_delay'])
+        await asleep(int(status['polling_delay']))
         if True:#sensor.get_sensor_data():
             measurement = {
-                'temperature': sensor.data.temperature,
-                'pressure': sensor.data.pressure,
-                'humidity': sensor.data.humidity,
+                'temperature': 25,#sensor.data.temperature,
+                'pressure': 1000,#sensor.data.pressure,
+                'humidity': 50,#sensor.data.humidity,
                 'ts':time(),
                 'date': str(datetime.now())
                 }
-            ctime = time()
-            if ctime-last_time>60: # log once every 60 seconds
-                with open('data.log', 'a') as logfile:
-                    logfile.write(dumps(measurement))
-                    logfile.write("\n")
-                last_time = ctime
+            with open('data.log', 'a') as logfile:
+                logfile.write(dumps(measurement))
+                logfile.write("\n")
 
 app.add_task(polling())
 
