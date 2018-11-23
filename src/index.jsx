@@ -28,6 +28,10 @@ settingsSocket.onmessage = (e: any) => {
 		document.getElementById('root'))
 }
 
+settingsSocket.onclose = function () {
+	console.error('settingsSocket closed unexpectedly')
+}
+
 feedSocket.onmessage = (e) => {
 	const data = JSON.parse(e.data)
 	if (app_ref.current != null) {
@@ -37,7 +41,4 @@ feedSocket.onmessage = (e) => {
 
 feedSocket.onclose = function () {
 	console.error('feedSocket closed unexpectedly')
-}
-settingsSocket.onclose = function () {
-	console.error('settingsSocket closed unexpectedly')
 }

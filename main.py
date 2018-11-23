@@ -1,9 +1,10 @@
-from sanic import Sanic
+from sanic import Sanic, response
 from json import dumps, loads
 from asyncio import sleep as asleep
 from time import time
 from datetime import datetime
 import bme680
+import pandas as pd
 
 #sensor = bme680.BME680()
 app = Sanic()
@@ -27,7 +28,6 @@ with open('status.json', 'r') as f:
 #       "humidity": {"color": "#0000FF", "plot_width": 1000, "plot_height": 200, "x_axis_seconds": 10, "y_axis_label": "% humidity", "y_axis_from": 0, "y_axis_to": 100, "visible": true}
 #   }
 # }
-
 
 #status['server-time'] = time()
 
@@ -64,7 +64,15 @@ async def new_settings(request, ws):
     await ws.send(dumps(status))
     async for message in ws:
         await consumer(message, ws)
-# Some sort of code to recieve status updates
+
+@app.route('/historic_json/<what>/<from>/<to>')
+async def historic_json(request, what, from, to):
+    with open('data.log') as logfile:
+        df = pd.DataFrame([loads(line) for line in logfile])
+    df['date'] = pd.to_datetime(df['date'])
+    df = df[['date', what]]
+    df = df[df[('date'] > datetime.fromisoformat(from)) & (date['date'] < datetime.fromisoformat(to))]
+    return response.json(df.to_json(orient='records'))
 
 async def polling():
     global measurement
