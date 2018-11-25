@@ -7,7 +7,7 @@ from io import BytesIO
 import bme680
 import pandas as pd
 
-#sensor = bme680.BME680()
+sensor = bme680.BME680()
 app = Sanic()
 measurement = {}
 
@@ -37,7 +37,7 @@ with open('status.json', 'r') as f:
 async def feed(request, ws):
     while True:
         await asleep(int(status['transmit_delay']))
-        if True: #sensor.get_sensor_data():
+        if sensor.get_sensor_data():
             await ws.send(dumps(measurement))
 
 
@@ -125,12 +125,12 @@ async def polling():
     global measurement
     while True:
         await asleep(int(status['polling_delay']))
-        if True:#sensor.get_sensor_data():
+        if sensor.get_sensor_data():
             measurement = {
-                'temperature': 25,#sensor.data.temperature,
-                'pressure': 1000,#sensor.data.pressure,
-                'humidity': 50,#sensor.data.humidity,
-                'ts':time(),
+                'temperature': sensor.data.temperature,
+                'pressure': sensor.data.pressure,
+                'humidity': sensor.data.humidity,
+                'ts': time(),
                 'date': str(datetime.now())
                 }
             with open('data.log', 'a') as logfile:
