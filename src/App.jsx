@@ -58,7 +58,7 @@ export default class App extends React.Component<Props, State>{
 			case 1:
 				middlething = (
 					<div>
-						<button>download all data button</button>
+						<a href="all_data"><button type="button">download all data</button></a>
 						{Object.entries(datastreams_meta).map(([key, values], index) =>
 							<DTGraph
 								ref={this.chart_refs[key]}

@@ -28,9 +28,7 @@ The canvas element will feature a time scrolling view of the data powered by [ch
 * realtime
   * offset
 * historical tab
-  * widget to select to/from date
   * widget to select time resolution
-  * button to download viewed or all data
 * settings tab
   * log file storage place
   *

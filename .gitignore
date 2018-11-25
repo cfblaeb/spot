@@ -1,5 +1,6 @@
 # code settings
 
+.idea
 .vscode/
 node_modules/
 

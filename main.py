@@ -3,6 +3,7 @@ from json import dumps, loads
 from asyncio import sleep as asleep
 from time import time
 from datetime import datetime
+from io import BytesIO
 import bme680
 import pandas as pd
 
@@ -31,12 +32,14 @@ with open('status.json', 'r') as f:
 
 #status['server-time'] = time()
 
+
 @app.websocket('/feed')
 async def feed(request, ws):
     while True:
         await asleep(int(status['transmit_delay']))
         if True: #sensor.get_sensor_data():
             await ws.send(dumps(measurement))
+
 
 async def consumer(mesmes, ws):
     new_data = loads(mesmes)
@@ -59,20 +62,64 @@ async def consumer(mesmes, ws):
         f.write(dumps(status))
     await ws.send(dumps(status))
 
+
 @app.websocket('/ws_settings')
 async def new_settings(request, ws):
     await ws.send(dumps(status))
     async for message in ws:
         await consumer(message, ws)
 
-@app.route('/historic_json/<what>/<from>/<to>')
-async def historic_json(request, what, from, to):
+
+@app.route('/historic_json/<what>/<start>/<end>')
+async def historic_json(request, what, start, end):
     with open('data.log') as logfile:
         df = pd.DataFrame([loads(line) for line in logfile])
     df['date'] = pd.to_datetime(df['date'])
-    df = df[['date', what]]
-    df = df[df[('date'] > datetime.fromisoformat(from)) & (date['date'] < datetime.fromisoformat(to))]
-    return response.json(df.to_json(orient='records'))
+    if what in df.columns:
+        df = df[['date', what]]
+        df = df[(df['date'] > datetime.fromisoformat(start)) & (df['date'] < datetime.fromisoformat(end))]
+        df.columns = ['x', 'y']
+        return response.json(df.to_json(orient='records'))
+    else:
+        return response.json(dumps({'error':f'no such things as {what}'}))
+
+
+@app.route('all_data')
+async def download_all_data(request):
+    return await response.file('data.log', filename='data.log')
+    ## hmm..data log is in a weird non standard format
+    #the following code is kinda slow but converts it to an excel file.
+    with open('data.log') as logfile:
+        df = pd.DataFrame([loads(line) for line in logfile])
+    df['date'] = pd.to_datetime(df['date'])
+    # gonna write an excel file to memory
+    bio = BytesIO()
+    writer = pd.ExcelWriter(bio, engine='xlsxwriter')
+    df.to_excel(writer, sheet_name='Sheet1')
+    writer.save()
+    bio.seek(0)
+    return response.raw(bio.read())
+
+
+@app.route('/<what>_<start>_<end>.xlsx')
+async def download_some_data(request, what, start, end):
+    with open('data.log') as logfile:
+        df = pd.DataFrame([loads(line) for line in logfile])
+    df['date'] = pd.to_datetime(df['date'])
+    if what in df.columns:
+        df = df[['date', what]]
+        df = df[(df['date'] > datetime.fromisoformat(start)) & (df['date'] < datetime.fromisoformat(end))]
+
+        # gonna write an excel file to memory
+        bio = BytesIO()
+        writer = pd.ExcelWriter(bio, engine='xlsxwriter')
+        df.to_excel(writer, sheet_name='Sheet1')
+        writer.save()
+        bio.seek(0)
+        return response.raw(bio.read())
+    else:
+        return response.text("some sort of error...i'm too lazy to code this. Post an issue on github.")
+
 
 async def polling():
     global measurement
