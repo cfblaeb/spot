@@ -6,9 +6,11 @@ from datetime import datetime
 from io import BytesIO
 import bme680
 import pandas as pd
+skip_bme = True
 
-sensor = bme680.BME680()
-sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
+if not skip_bme:
+    sensor = bme680.BME680()
+    sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
 app = Sanic()
 measurement = {}
 
@@ -38,7 +40,7 @@ with open('status.json', 'r') as f:
 async def feed(request, ws):
     while True:
         await asleep(int(status['transmit_delay']))
-        if sensor.get_sensor_data():
+        if skip_bme or sensor.get_sensor_data():
             await ws.send(dumps(measurement))
 
 
@@ -142,8 +144,19 @@ async def polling():
     global measurement
     while True:
         await asleep(int(status['polling_delay']))
-        if sensor.get_sensor_data() and sensor.data.heat_stable:
-
+        if skip_bme:
+            measurement = {
+                'temperature': 15,
+                'pressure': 1000,
+                'humidity': 20,
+                'gas': 100,
+                'ts': time(),
+                'date': str(datetime.now())
+            }
+            with open('data.log', 'a') as logfile:
+                logfile.write(dumps(measurement))
+                logfile.write("\n")
+        elif sensor.get_sensor_data() and sensor.data.heat_stable:
             measurement = {
                 'temperature': sensor.data.temperature,
                 'pressure': sensor.data.pressure,
