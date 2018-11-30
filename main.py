@@ -148,7 +148,7 @@ async def polling():
                 'temperature': sensor.data.temperature,
                 'pressure': sensor.data.pressure,
                 'humidity': sensor.data.humidity,
-                'gas': sensor.data.gas_resistance
+                'gas': sensor.data.gas_resistance,
                 'ts': time(),
                 'date': str(datetime.now())
                 }
