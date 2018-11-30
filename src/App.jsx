@@ -10,17 +10,14 @@ type Props = {
 	server_hardware_polling_frequency: number,
 	settingsSocket: WebSocket,
 }
-
-type State = {
-	page: number
-}
+type State = {page: number}
 
 export default class App extends React.Component<Props, State>{
 	chart_refs: {[string]: {current: null | React.Element<typeof RTGraph> }}
 	constructor(props: Props) {
-			super(props)
-			this.chart_refs = Object.assign(...Object.keys(props.datastreams_meta).map(key => ({[key]: React.createRef()})))
-			this.state = {page:0}
+		super(props)
+		this.chart_refs = Object.assign(...Object.keys(props.datastreams_meta).map(key => ({[key]: React.createRef()})))
+		this.state = {page: 0}
 	}
 
 	newServerData = (data: {[string]: number}) => {
@@ -31,11 +28,12 @@ export default class App extends React.Component<Props, State>{
 			Object.keys(datastreams_meta).forEach((key: string, index: number) => {
 				if (this.chart_refs.hasOwnProperty(key) && this.chart_refs[key].current != null) {
 					this.chart_refs[key].current.line_ref.current.chartInstance.config.data.datasets[0].data.push({
-						x: data.ts*1000,  // python server sends time in seconds, but js expects ms
+						x: data.ts * 1000,  // python server sends time in seconds, but js expects ms
 						y: data[key]
 					})
 					this.chart_refs[key].current.line_ref.current.chartInstance.update({preservation: true})
-				}})
+				}
+			})
 		}
 	}
 
@@ -46,14 +44,15 @@ export default class App extends React.Component<Props, State>{
 		switch (page) {
 			case 0:
 				middlething = Object.entries(datastreams_meta).map(([key, values], index) =>
-				<RTGraph
-					ref={this.chart_refs[key]}
-					key={key}
-					settingsSocket={settingsSocket}
-					label={key}
-					server_transmit_frequency={server_transmit_frequency}
-					datastream_meta={datastreams_meta[key]}
-				/>)
+					<RTGraph
+						ref={this.chart_refs[key]}
+						key={key}
+						settingsSocket={settingsSocket}
+						label={key}
+						server_transmit_frequency={server_transmit_frequency}
+						datastream_meta={datastreams_meta[key]}
+					/>
+				)
 				break;
 			case 1:
 				middlething = (

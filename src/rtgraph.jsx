@@ -6,22 +6,22 @@ type Props = {
   label: string,
   datastream_meta: {[string]: string },
   server_transmit_frequency: number,
-  settingsSocket: WebSocket
+  settingsSocket: WebSocket,
 }
 
-type State = {
-  settings_open: boolean
-}
+type State = {settings_open: boolean}
 
 export default class RTGraph extends Component<Props, State> {
   line_ref: {current: null | Line }
   graph_options: {}
-	constructor(props: Props) {
-			super(props)
-			this.line_ref = React.createRef()
-      this.graph_options = this.convertMetaToOptions(this.props.datastream_meta, this.props.label, this.props.server_transmit_frequency)
-      this.state = {settings_open: false}
-	}
+
+  constructor(props: Props) {
+    super(props)
+    this.line_ref = React.createRef()
+    this.graph_options = this.convertMetaToOptions(this.props.datastream_meta, this.props.label, this.props.server_transmit_frequency)
+    this.state = {settings_open: false}
+  }
+
   convertMetaToOptions = (meta: {[string]: string }, label: string, server_transmit_frequency: number) => {
     /*"temperature": {"color": "#FF0000", "plot_width": 1000, "plot_height": 200, "x_axis_seconds": 10, "y_axis_label": "celcius"},}*/
     return {
@@ -42,7 +42,8 @@ export default class RTGraph extends Component<Props, State> {
       }
     }
   }
-  componentDidUpdate = () => {
+
+  componentDidUpdate(): void {
     const x_axis_seconds = parseInt(this.props.datastream_meta.x_axis_seconds)
     this.line_ref.current.chartInstance.config.options.scales.xAxes[0].realtime.duration = x_axis_seconds*1000
     //this.line_ref.current.chartInstance.config.options.scales.xAxes[0].realtime.delay = this.props.server_transmit_frequency*1000*2

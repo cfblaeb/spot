@@ -24,11 +24,17 @@ The server will serve 1 static html page with a [canvas](https://developer.mozil
 It will connect to the server via [websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) and everytime it gets a datapacket its going to plot it  
 The canvas element will feature a time scrolling view of the data powered by [charts.js] (chartjs.org)
 
-# to do list
-* realtime
-  * offset
-* historical tab
-  * widget to select time resolution
-* settings tab
+## to do list
+* settings
+  * realtime
+    * calibration offset
   * log file storage place
-  *
+* realtime
+  * pop with existing data
+
+## post development thoughts
+* hardware
+  * impressively easy. No major complaints.
+* Software  
+  * Is sanic good...I dont know. Yes I guess. I feel like I dont fully understand it.
+  * My own code: Combination of learning curve (my first websocket, sanic and chartjs project) and lazyness and time constraints have produced a less than perfect yet functional product. 

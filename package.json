@@ -34,7 +34,7 @@
     "flow-bin": "latest",
     "style-loader": "latest",
     "svg-inline-loader": "latest",
-    "webpack": "^4.26.0",
+    "webpack": "latest",
     "webpack-cli": "latest"
   },
   "dependencies": {

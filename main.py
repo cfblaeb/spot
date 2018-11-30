@@ -1,5 +1,5 @@
 from sanic import Sanic, response
-from json import dumps, loads
+from json import dumps, loads, load, dump
 from asyncio import sleep as asleep
 from time import time
 from datetime import datetime
@@ -8,6 +8,7 @@ import bme680
 import pandas as pd
 
 sensor = bme680.BME680()
+sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
 app = Sanic()
 measurement = {}
 
@@ -16,10 +17,10 @@ app.static('/bundle.js', './dist/bundle.js')
 app.static('/', './index.html')
 
 with open('status.json', 'r') as f:
-    status = loads(f.read())
+    status = load(f)
 
 # {
-#   "polling_delay": 0.01,
+#   "polling_delay": 0.01,s
 #   "transmit_delay": 1,
 #   "streams": {
 #       "temperature": {"color": "#FF0000", "plot_width": 1000, "plot_height": 200,
@@ -59,7 +60,7 @@ async def consumer(mesmes, ws):
         # TODO: sanitize input!!
         status["streams"][new_data['label']][new_data['key']] = new_data['value']
     with open('status.json', 'w') as f:
-        f.write(dumps(status))
+        dump(status, f)
     await ws.send(dumps(status))
 
 
@@ -82,6 +83,22 @@ async def historic_json(request, what, start, end):
         return response.json(df.to_json(orient='records'))
     else:
         return response.json(dumps({'error':f'no such things as {what}'}))
+
+
+@app.route('/pop_data')
+async def pop_data(request):
+    with open('data.log') as logfile:
+        df = pd.DataFrame([loads(line) for line in logfile])
+    df['date'] = pd.to_datetime(df['date'])
+    return_response = {}
+
+    for key, item in status['streams'].items():
+        before_time = time() - int(item["x_axis_seconds"])
+        frame = df[df['ts'] > before_time].copy()
+        frame = frame[['date', key]]
+        frame.columns = ['x', 'y']
+        return_response[key] = loads(frame.to_json(orient='records'))
+    return response.json(dumps(return_response))
 
 
 @app.route('all_data')
@@ -125,11 +142,13 @@ async def polling():
     global measurement
     while True:
         await asleep(int(status['polling_delay']))
-        if sensor.get_sensor_data():
+        if sensor.get_sensor_data() and sensor.data.heat_stable:
+
             measurement = {
                 'temperature': sensor.data.temperature,
                 'pressure': sensor.data.pressure,
                 'humidity': sensor.data.humidity,
+                'gas': sensor.data.gas_resistance
                 'ts': time(),
                 'date': str(datetime.now())
                 }
