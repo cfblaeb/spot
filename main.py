@@ -6,7 +6,7 @@ from datetime import datetime
 from io import BytesIO
 import bme680
 import pandas as pd
-skip_bme = True
+skip_bme = False
 
 if not skip_bme:
     sensor = bme680.BME680()

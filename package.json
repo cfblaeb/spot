@@ -1,6 +1,8 @@
 {
   "name": "spot",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "version": "1.0.0",
   "description": "This is a little fun side project to see how hard/easy it is to make a Temperature, air pressure, humidity and \"air quality\" logger.",
   "private": true,
