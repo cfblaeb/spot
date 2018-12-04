@@ -26,54 +26,67 @@ with open('status.json', 'r') as f:
     status = load(f)
 
 # {
-#   "polling_delay": 0.01,s
-#   "transmit_delay": 1,
+#   "seconds_between_updating_live_stream": "1",
+#   "seconds_between_storing_measurements": "60",
 #   "streams": {
-#       "temperature": {"color": "#FF0000", "plot_width": 1000, "plot_height": 200,
-#           "x_axis_seconds": 10, "y_axis_label": "celcius", "y_axis_from": -50, "y_axis_to": 50,
-#           "visible": true},
-#       "pressure": {"color": "#00FF00", plot_width": 1000, "plot_height": 200, "x_axis_seconds": 10, "y_axis_label": "ehm..pressure..unit", "y_axis_from": 800, "y_axis_to": 1200, "visible": true},
-#       "humidity": {"color": "#0000FF", "plot_width": 1000, "plot_height": 200, "x_axis_seconds": 10, "y_axis_label": "% humidity", "y_axis_from": 0, "y_axis_to": 100, "visible": true}
+#     "temperature": {
+#       "color": "#FF0000",
+#       "plot_width": 1000,
+#       "plot_height": 200,
+#       "x_axis_seconds": "30",
+#       "y_axis_label": "celcius"
+#     },
+#     "pressure": {
+#       "color": "#00FF00",
+#       "plot_width": 1000,
+#       "plot_height": 200,
+#       "x_axis_seconds": "50",
+#       "y_axis_label": "hPa"
+#     },
+#     "humidity": {
+#       "color": "#0000FF",
+#       "plot_width": 1000,
+#       "plot_height": 200,
+#       "x_axis_seconds": "19",
+#       "y_axis_label": "% humidity"
+#     },
+#     "gas": {
+#       "color": "#FFA500",
+#       "plot_width": 1000,
+#       "plot_height": 200,
+#       "x_axis_seconds": "10",
+#       "y_axis_label": "Ohms"
+#     }
 #   }
 # }
 
-#status['server-time'] = time()
 
-
+# live feed. Just sends the latest measurement
 @app.websocket('/feed')
 async def feed(request, ws):
     while True:
-        await asleep(int(status['transmit_delay']))
-        if skip_bme or sensor.get_sensor_data():
-            await ws.send(dumps(measurement))
+        await asleep(int(status['seconds_between_updating_live_stream']))
+        await perform_measurement()
+        await ws.send(dumps(measurement))
 
 
+# settings "consumer". It interprets requests to change settings
 async def consumer(mesmes, ws):
+    # TODO: less naive input handling
     new_data = loads(mesmes)
-    # remember to sanitize input!!
     if new_data['label'] == 'root':
-        if new_data['key'] == 'polling_delay':
-            status['polling_delay'] = new_data['value']
-            if int(new_data['value']) > int(status['transmit_delay']):
-                # transmit_delay >= polling_delay
-                status['transmit_delay'] = new_data['value']
-        elif new_data['key'] == 'transmit_delay':
-            status['transmit_delay'] = new_data['value']
-            if int(new_data['value']) < int(status['polling_delay']):
-                # polling_delay <= transmit_delay
-                status['polling_delay'] = new_data['value']
+        status[new_data['key']] = new_data['value']
     else:
-        # TODO: sanitize input!!
         status["streams"][new_data['label']][new_data['key']] = new_data['value']
     with open('status.json', 'w') as f:
-        dump(status, f)
+        dump(status, f)  # write new status
     await ws.send(dumps(status))
 
 
 @app.websocket('/ws_settings')
 async def new_settings(request, ws):
-    await ws.send(dumps(status))
-    async for message in ws:
+    await ws.send(dumps(status))  # return new status to server
+    async for message in ws:  # consume incomming requests for settings changes
         await consumer(message, ws)
 
 
@@ -89,22 +102,6 @@ async def historic_json(request, what, start, end):
         return response.json(df.to_json(orient='records'))
     else:
         return response.json(dumps({'error':f'no such things as {what}'}))
-
-
-@app.route('/pop_data')
-async def pop_data(request):
-    with open('data.log') as logfile:
-        df = pd.DataFrame([loads(line) for line in logfile])
-    df['date'] = pd.to_datetime(df['date'])
-    return_response = {}
-
-    for key, item in status['streams'].items():
-        before_time = time() - int(item["x_axis_seconds"])
-        frame = df[df['ts'] > before_time].copy()
-        frame = frame[['date', key]]
-        frame.columns = ['x', 'y']
-        return_response[key] = loads(frame.to_json(orient='records'))
-    return response.json(dumps(return_response))
 
 
 @app.route('all_data')
@@ -144,34 +141,40 @@ async def download_some_data(request, what, start, end):
         return response.text("some sort of error...i'm too lazy to code this. Post an issue on github.")
 
 
-async def polling():
+async def perform_measurement():
     global measurement
+    if skip_bme:
+        measurement = {
+            'temperature': 15,
+            'pressure': 1000,
+            'humidity': 20,
+            'gas': 100,
+            'ts': time(),
+            'date': str(datetime.now())
+        }
+    elif sensor.get_sensor_data() and sensor.data.heat_stable:
+        measurement = {
+            'temperature': sensor.data.temperature,
+            'pressure': sensor.data.pressure,
+            'humidity': sensor.data.humidity,
+            'gas': sensor.data.gas_resistance,
+            'ts': time(),
+            'date': str(datetime.now())
+        }
+
+
+async def polling():
     while True:
-        await asleep(int(status['polling_delay']))
-        if skip_bme:
-            measurement = {
-                'temperature': 15,
-                'pressure': 1000,
-                'humidity': 20,
-                'gas': 100,
-                'ts': time(),
-                'date': str(datetime.now())
-            }
-            with open('data.log', 'a') as logfile:
-                logfile.write(dumps(measurement))
-                logfile.write("\n")
-        elif sensor.get_sensor_data() and sensor.data.heat_stable:
-            measurement = {
-                'temperature': sensor.data.temperature,
-                'pressure': sensor.data.pressure,
-                'humidity': sensor.data.humidity,
-                'gas': sensor.data.gas_resistance,
-                'ts': time(),
-                'date': str(datetime.now())
-                }
-            with open('data.log', 'a') as logfile:
-                logfile.write(dumps(measurement))
-                logfile.write("\n")
+        wait_time = int(status['seconds_between_storing_measurements'])
+        await asleep(wait_time)
+        # check if current measurement is "new enough", and if so, just use it
+        new_enough = wait_time/10  # new enough is 1/10th of wait time
+        if measurement['ts']+new_enough < time():
+            await perform_measurement()
+        with open('data.log', 'a') as logfile:
+            logfile.write(dumps(measurement))
+            logfile.write("\n")
+
 
 app.add_task(polling())
 

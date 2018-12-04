@@ -5,25 +5,25 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App.jsx'
 
-var app_ref: {current: null | App} = React.createRef()
-var feedSocket = new WebSocket('ws://' + window.location.host + '/feed')
-var settingsSocket = new WebSocket('ws://' + window.location.host + '/ws_settings')
+let app_ref: {current: null | App} = React.createRef()
+let feedSocket = new WebSocket('ws://' + window.location.host + '/feed')
+let settingsSocket = new WebSocket('ws://' + window.location.host + '/ws_settings')
 
-settingsSocket.onmessage = (e: any) => {
+settingsSocket.onmessage = (e) => {
 	const data = JSON.parse(e.data)
-	//{ "polling_delay": 0.01, "transmit_delay": 0.5, "streams": {
-	//		"temperature": {"color": "red", "plot_x": 0, "plot_y": 0, "plot_width": 1000, "plot_height": 200, "x_axis_label": "seconds", "x_axis_seconds": 10, "y_axis_label": "celcius", "y_axis_from": -50, "y_axis_to": 50, "visible": true},
-	//		"pressure": {"color": "green", "plot_x": 0, "plot_y": 250, "plot_width": 1000, "plot_height": 200, "x_axis_label": "seconds", "x_axis_seconds": "10", "y_axis_label": "ehm..pressure..unit", "y_axis_from": 800, "y_axis_to": 1200, "visible": true},
-	//		"humidity": {"color": "blue", "plot_x": 0, "plot_y": 500, "plot_width": 1000, "plot_height": 200, "x_axis_label": "seconds", "x_axis_seconds": 10, "y_axis_label": "% humidity", "y_axis_from": 0, "y_axis_to": 100, "visible": true}}}*/
-
-	//,
+	//{"seconds_between_updating_live_stream": "1", "seconds_between_storing_measurements": "60",
+	// "streams": {
+	//   "temperature": {"color": "#FF0000","plot_width": 1000,"plot_height": 200,"x_axis_seconds": "30","y_axis_label": "celcius"},
+	//   "pressure": {
+	//   "humidity": {
+	//   "gas":
 	ReactDOM.render(
 		<App
 			ref={app_ref}
 			settingsSocket={settingsSocket}
 			datastreams_meta={data['streams']}
-			server_transmit_frequency={parseInt(data['transmit_delay'])}
-			server_hardware_polling_frequency={parseInt(data['polling_delay'])}
+			seconds_between_updating_live_stream={parseInt(data['seconds_between_updating_live_stream'])}
+			seconds_between_storing_measurements={parseInt(data['seconds_between_storing_measurements'])}
 		/>,
 		document.getElementById('root'))
 }
@@ -33,9 +33,11 @@ settingsSocket.onclose = function () {
 }
 
 feedSocket.onmessage = (e) => {
-	const data = JSON.parse(e.data)
-	if (app_ref.current != null) {
-		app_ref.current.newServerData(data)
+	if (typeof e.data === 'string' || e.data instanceof String) {
+		const data = JSON.parse(e.data)
+		if (app_ref.current != null) {
+			app_ref.current.newServerData(data)
+		}
 	}
 }
 

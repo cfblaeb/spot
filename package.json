@@ -29,6 +29,7 @@
     "@babel/preset-env": "latest",
     "@babel/preset-flow": "latest",
     "@babel/preset-react": "latest",
+    "babel-eslint": "latest",
     "babel-loader": "latest",
     "css-loader": "latest",
     "eslint": "latest",

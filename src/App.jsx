@@ -5,9 +5,9 @@ import DTGraph from './datalog.jsx'
 import Settings from './settings.jsx'
 
 type Props = {
-	datastreams_meta: {[string]: {[string]: string }},
-	server_transmit_frequency: number,
-	server_hardware_polling_frequency: number,
+	datastreams_meta: {},
+	seconds_between_updating_live_stream: number,
+	seconds_between_storing_measurements: number,
 	settingsSocket: WebSocket,
 }
 type State = {page: number}
@@ -25,7 +25,7 @@ export default class App extends React.Component<Props, State>{
 		const {page} = this.state
 		const {datastreams_meta} = this.props
 		if (page == 0) {
-			Object.keys(datastreams_meta).forEach((key: string, index: number) => {
+			Object.keys(datastreams_meta).forEach(key => {
 				if (this.chart_refs.hasOwnProperty(key) && this.chart_refs[key].current != null) {
 					this.chart_refs[key].current.line_ref.current.chartInstance.config.data.datasets[0].data.push({
 						x: data.ts * 1000,  // python server sends time in seconds, but js expects ms
@@ -39,18 +39,18 @@ export default class App extends React.Component<Props, State>{
 
 	render() {
 		const {page} = this.state
-		const {server_transmit_frequency, server_hardware_polling_frequency, datastreams_meta, settingsSocket} = this.props
+		const {seconds_between_updating_live_stream, seconds_between_storing_measurements, datastreams_meta, settingsSocket} = this.props
 		let middlething = <div>missing</div>
 		switch (page) {
 			case 0:
-				middlething = Object.entries(datastreams_meta).map(([key, values], index) =>
+				middlething = Object.keys(datastreams_meta).map(key =>
 					<RTGraph
 						ref={this.chart_refs[key]}
 						key={key}
-						settingsSocket={settingsSocket}
 						label={key}
-						server_transmit_frequency={server_transmit_frequency}
+						settingsSocket={settingsSocket}
 						datastream_meta={datastreams_meta[key]}
+						seconds_between_updating_live_stream={seconds_between_updating_live_stream}
 					/>
 				)
 				break;
@@ -58,11 +58,9 @@ export default class App extends React.Component<Props, State>{
 				middlething = (
 					<div>
 						<a href="all_data"><button type="button">download all data</button></a>
-						{Object.entries(datastreams_meta).map(([key, values], index) =>
+						{Object.keys(datastreams_meta).map(key =>
 							<DTGraph
-								ref={this.chart_refs[key]}
 								key={key}
-								settingsSocket={settingsSocket}
 								label={key}
 								datastream_meta={datastreams_meta[key]}
 							/>
@@ -73,10 +71,9 @@ export default class App extends React.Component<Props, State>{
 			case 2:
 				middlething =
 					<Settings
-						datastreams_meta={datastreams_meta}
-						server_transmit_frequency={server_transmit_frequency}
-						server_hardware_polling_frequency={server_hardware_polling_frequency}
 						settingsSocket={settingsSocket}
+						seconds_between_updating_live_stream={seconds_between_updating_live_stream}
+						seconds_between_storing_measurements={seconds_between_storing_measurements}
 					/>
 				break;
 		}

@@ -26,11 +26,11 @@ The canvas element will feature a time scrolling view of the data powered by [ch
 
 ## to do list
 * settings
-  * realtime
-    * calibration offset
+  * calibration offset
   * log file storage place
-* realtime
-  * pop with existing data
+* realtime (back and front)
+  * make it so that realtime is updated more frequently. Separately from logging delay
+    * So a log time and a measure/transmit time
 
 ## post development thoughts
 * hardware

@@ -2,9 +2,8 @@
 import React, { Component } from 'react'
 
 type Props = {
-	datastreams_meta: {[string]: {[string]: string }},
-	server_transmit_frequency: number,
-	server_hardware_polling_frequency: number,
+	seconds_between_updating_live_stream: number,
+	seconds_between_storing_measurements: number,
 	settingsSocket: WebSocket
 }
 
@@ -21,21 +20,21 @@ export default class Settings extends Component<Props> {
   }
 
   render() {
-		const {datastreams_meta, server_transmit_frequency, server_hardware_polling_frequency} = this.props
+		const {seconds_between_updating_live_stream, seconds_between_storing_measurements} = this.props
     return (
       <div id="settingsDiv">
 				<label htmlFor="smf" className="settingsClass">
-					<div>Server measure delay (seconds between measurements):&nbsp;&nbsp;</div>
+					<div>Seconds between updating live stream:&nbsp;&nbsp;</div>
 					<input id="smf" type="number" min="1"
-						onChange={(e) => this.woc_root('polling_delay',e.target.value)}
-						value={server_hardware_polling_frequency}
+						onChange={(e) => this.woc_root('seconds_between_updating_live_stream',e.target.value)}
+						value={seconds_between_updating_live_stream}
 					/>
 				</label>
 				<label htmlFor="std" className="settingsClass">
-					<div>Server transmit delay (seconds between sending latest measurement to web interface):&nbsp;&nbsp;</div>
+					<div>Seconds between storing measurements on server:&nbsp;&nbsp;</div>
 					<input id="std" type="number" min="1"
-						onChange={(e) => this.woc_root('transmit_delay',e.target.value)}
-						value={server_transmit_frequency}
+						onChange={(e) => this.woc_root('seconds_between_storing_measurements',e.target.value)}
+						value={seconds_between_storing_measurements}
 					/>
 				</label>
       </div>
