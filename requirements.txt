@@ -1,6 +1,4 @@
-wheel>=0.32.3
-bme680>=1.0.5
-smbus-cffi>=0.5.1
-sanic>=0.8.3
-xlsxwriter>=1.1.2
-pandas>=0.23.4
+bme680>=1.1.1
+sanic~=22.12.0
+xlsxwriter~=3.0.8
+pandas~=1.5.3

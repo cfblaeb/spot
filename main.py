@@ -6,7 +6,7 @@ from datetime import datetime
 from io import BytesIO
 import bme680
 import pandas as pd
-skip_bme = False
+skip_bme = True
 
 if not skip_bme:
     sensor = bme680.BME680()
@@ -15,12 +15,12 @@ if not skip_bme:
     sensor.set_gas_heater_duration(150)
     sensor.select_gas_heater_profile(0)
 
-app = Sanic()
+app = Sanic("zeroSPOT")
 measurement = {}
 
-app.static('/favicon.ico', './favicon.ico')
-app.static('/bundle.js', './dist/bundle.js')
-app.static('/', './index.html')
+app.static('/favicon.ico', './favicon.ico', name='favicon')
+app.static('/bundle.js', './dist/bundle.js', name='bundle')
+app.static('/', './index.html', name='index')
 
 with open('status.json', 'r') as f:
     status = load(f)
@@ -121,8 +121,11 @@ async def download_all_data(request):
     return response.raw(bio.read())
 
 
-@app.route('/<what>_<start>_<end>.xlsx')
-async def download_some_data(request, what, start, end):
+@app.route('/<name:ext=xlsx>')
+async def download_some_data(request, name, ext):
+    what, start, end = name.split("_")
+    print(name, ext)
+    print(what, start, end)
     with open('data.log') as logfile:
         df = pd.DataFrame([loads(line) for line in logfile])
     df['date'] = pd.to_datetime(df['date'])
@@ -169,7 +172,7 @@ async def polling():
         await asleep(wait_time)
         # check if current measurement is "new enough", and if so, just use it
         new_enough = wait_time/10  # new enough is 1/10th of wait time
-        if measurement['ts']+new_enough < time():
+        if "ts" not in measurement or measurement['ts']+new_enough < time():
             await perform_measurement()
         with open('data.log', 'a') as logfile:
             logfile.write(dumps(measurement))
