@@ -75,21 +75,23 @@ def on_connect(client, userdata, flags, reason_code, properties):
 def on_message(client, userdata, msg):
     print(f"{msg.topic} {msg.payload}")
 
-def perform_measurement():
+
+def perform_measurement(last_meas):
     if skip_bme:
-        return {
+        last_meas = {
             'temperature': 15,
             'pressure': 1000,
             'humidity': 20,
             'air_quality': 100,
         }
     elif sensor.get_sensor_data() and sensor.data.heat_stable:
-        return {
+        last_meas = {
             'temperature': sensor.data.temperature,
             'humidity': sensor.data.humidity,
             'air_quality': sensor.data.gas_resistance,
             'pressure': sensor.data.pressure,
         }
+    return last_meas
 
 if not skip_bme:
     sensor = bme680.BME680()
@@ -110,8 +112,15 @@ client.on_message = on_message
 client.connect(MQTT_BROKER, MQTT_PORT, 60)
 client.loop_start()
 
+mes = {
+    'temperature': 15,
+    'pressure': 1000,
+    'humidity': 20,
+    'air_quality': 100,
+}
+
 while True:
-    mes = perform_measurement()
+    mes = perform_measurement(mes)
     client.publish(MQTT_STATE_TOPIC_TEMP, str(mes['temperature']))
     client.publish(MQTT_STATE_TOPIC_HUM, str(mes['humidity']))
     client.publish(MQTT_STATE_TOPIC_AIR, str(mes['air_quality']))
