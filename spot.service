@@ -1,0 +1,15 @@
+[Unit]
+Description=zeroSPOT Sanic Data Logger
+After=network.target
+
+[Service]
+Type=simple
+User=laeb
+Group=laeb
+WorkingDirectory=/home/laeb/spot
+ExecStart=/home/laeb/spot/.venv/bin/python3 main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

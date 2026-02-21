@@ -9,7 +9,7 @@ import bme680
 import pandas as pd
 
 # MIMIC SENSOR DATA. Set to False to use real sensor data, True to use fake data. Useful for testing on non-raspberry pi machines.
-skip_bme = True
+skip_bme = False
 
 if not skip_bme:
     sensor = bme680.BME680()
