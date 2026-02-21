@@ -13,6 +13,12 @@ skip_bme = True
 
 if not skip_bme:
     sensor = bme680.BME680()
+    # Ensure ambient_temperature is set before calculating heater resistance
+    if sensor.ambient_temperature is None:
+        sensor.get_sensor_data()
+    if sensor.ambient_temperature is None:
+        sensor.ambient_temperature = 25  # Fallback to a default if still None
+
     sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
     sensor.set_gas_heater_temperature(320)
     sensor.set_gas_heater_duration(150)
