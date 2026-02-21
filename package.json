@@ -9,8 +9,7 @@
   "main": "spot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack",
-    "flow": "flow"
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
@@ -23,28 +22,22 @@
   },
   "homepage": "https://github.com/cfblaeb/spot#readme",
   "devDependencies": {
-    "@babel/cli": "latest",
-    "@babel/core": "latest",
-    "@babel/plugin-proposal-class-properties": "latest",
-    "@babel/preset-env": "latest",
-    "@babel/preset-flow": "latest",
-    "@babel/preset-react": "latest",
-    "babel-eslint": "latest",
-    "babel-loader": "latest",
-    "css-loader": "latest",
-    "eslint": "latest",
-    "eslint-plugin-react": "latest",
-    "flow-bin": "latest",
-    "style-loader": "latest",
-    "svg-inline-loader": "latest",
-    "webpack": "latest",
-    "webpack-cli": "latest"
+    "@babel/core": "7.29.0",
+    "@babel/preset-env": "7.29.0",
+    "@babel/preset-react": "7.28.5",
+    "babel-loader": "10.0.0",
+    "css-loader": "7.1.4",
+    "style-loader": "4.0.0",
+    "webpack": "5.105.2",
+    "webpack-cli": "6.0.1"
   },
   "dependencies": {
-    "chart.js": "latest",
-    "chartjs-plugin-streaming": "latest",
-    "react": "latest",
-    "react-chartjs-2": "latest",
-    "react-dom": "latest"
+    "@aziham/chartjs-plugin-streaming": "3.5.1",
+    "chart.js": "4.5.1",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "date-fns": "^4.1.0",
+    "react": "19.2.4",
+    "react-chartjs-2": "5.3.1",
+    "react-dom": "19.2.4"
   }
 }

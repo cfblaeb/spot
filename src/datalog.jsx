@@ -1,68 +1,51 @@
-// @flow
 import {Line} from "react-chartjs-2"
 import React, {Component} from "react"
 
-type Props = {
-	label: string,
-	datastream_meta: {
-		color: string,
-		y_axis_label: string,
-		plot_width: number,
-		plot_height: number
-	},
-}
-type State = {
-	graph_options: {},
-	start_time: string,
-	end_time: string,
-	visible_data: Array<Object>
-}
+export default class DTGraph extends Component {
+  constructor(props) {
+    super(props)
+    this.line_ref = React.createRef()
+    this.state = {
+      visible_data: [],
+      start_time: (new Date(Date.now() - 1000 * 60 * 60 * 24 * 30)).toISOString().substring(0, 10),
+      end_time: (new Date).toISOString().substring(0, 10),
+      graph_options: {
+        plugins: {
+          streaming: false,
+          legend: {display: false,},
+        },
+        maintainAspectRatio: true,
+        scales: {
+          x: {
+            type: "time",
+          },
+          y: {
+            position: "right",
+            title: {
+              display: true,
+              text: this.props.datastream_meta["y_axis_label"],
+              color: this.props.datastream_meta["color"],
+              font: {
+                size: 16,
+                weight: "bold",
+              }
+            },
+          },
+        }
+      }
+    }
+  }
 
-export default class DTGraph extends Component<Props, State> {
-	line_ref: { current: null | Line }
-
-	constructor(props: Props) {
-		super(props)
-		this.line_ref = React.createRef()
-		this.state = {
-			visible_data: [],
-			start_time: (new Date(Date.now() - 1000 * 60 * 60 * 24 * 30)).toISOString().substring(0, 10),
-			end_time: (new Date).toISOString().substring(0, 10),
-			graph_options: {
-				plugins: {streaming: false},
-				legend: {display: false,}, maintainAspectRatio: true,
-				scales: {
-					xAxes: [{
-						type: "time",
-						time: {
-							displayFormats: {
-								millisecond: "HH:mm:ss.SSS", second: "HH:mm:ss", minute: "HH:mm", hour: "HH"
-							},
-						}
-					}],
-					yAxes: [{
-						position: "right",
-						scaleLabel: {
-							display: true, fontSize: 16, fontStyle: "bold",
-							fontColor: this.props.datastream_meta["color"],
-							labelString: this.props.datastream_meta["y_axis_label"],
-						},
-					}],
-				}
-			}
-		}
-	}
-
-	set_start_time = (time: string) => {
+	set_start_time = (time) => {
 		this.setState({"start_time": time})
 		this.fetch_data(time, this.state.end_time)
 	}
-	set_end_time = (time: string) => {
+	set_end_time = (time) => {
 		this.setState({"end_time": time})
 		this.fetch_data(this.state.start_time, time)
 	}
 
-	fetch_data = (start_time: string, end_time: string) => {
+	fetch_data = (start_time, end_time) => {
 		if (start_time && end_time) {
 			const {label} = this.props
 			fetch("/historic_json/" + label + "/" + start_time + "/" + end_time)
@@ -72,7 +55,7 @@ export default class DTGraph extends Component<Props, State> {
 		}
 	}
 
-	componentDidMount(): void {
+	componentDidMount() {
 		this.fetch_data(this.state.start_time, this.state.end_time)
 	}
 

@@ -1,71 +1,59 @@
-// @flow
+
 import { Line } from 'react-chartjs-2'
 import React, { Component } from 'react'
 
-type Props = {
-  label: string,
-  datastream_meta: {
-    x_axis_seconds: number,
-    color: string,
-    y_axis_label: string,
-    plot_width: number,
-    plot_height: number
-  },
-  seconds_between_updating_live_stream: number,
-  settingsSocket: WebSocket,
-}
-
-type State = {
-  settings_open: boolean,
-  graph_options: {}
-}
-
-export default class RTGraph extends Component<Props, State> {
-  line_ref: {current: null | Line }
-
-  constructor(props: Props) {
+export default class RTGraph extends Component {
+  constructor(props) {
     super(props)
     this.line_ref = React.createRef()
     this.state = {
       settings_open: false,
       graph_options: {
-        legend: {display: false,}, maintainAspectRatio: true,
+        plugins: {
+          legend: {display: false,},
+        },
+        maintainAspectRatio: true,
         scales: {
-          xAxes: [{
+          x: {
             type: 'realtime',
             realtime:{
               duration: parseInt(this.props.datastream_meta.x_axis_seconds)*1000,
               delay: this.props.seconds_between_updating_live_stream*1000,
               pause: false,
               //frameRate: 50,
-            }, time: {displayFormats: {millisecond: 'HH:mm:ss.SSS', second: 'HH:mm:ss', minute:'HH:mm', hour:	'HH'},}}],
-          yAxes: [{
-            position: 'right',
-            scaleLabel: {
-              display: true,
-              fontSize: 16,
-              fontStyle: 'bold',
-              fontColor: this.props.datastream_meta.color,
-              labelString: this.props.datastream_meta.y_axis_label,
             },
-          }],
+            ticks: {
+              maxRotation: 0,
+            }
+          },
+          y: {
+            position: 'right',
+            title: {
+              display: true,
+              text: this.props.datastream_meta.y_axis_label,
+              color: this.props.datastream_meta.color,
+              font: {
+                size: 16,
+                weight: 'bold',
+              },
+            },
+          },
         }
       }
     }
   }
 
-  componentDidUpdate(): void {
+  componentDidUpdate() {
     const x_axis_seconds = parseInt(this.props.datastream_meta.x_axis_seconds)
     if (this.line_ref.current != null) {
-      this.line_ref.current.chartInstance.config.options.scales.xAxes[0].realtime.duration = x_axis_seconds*1000
-      //this.line_ref.current.chartInstance.config.options.scales.xAxes[0].realtime.delay = this.props.seconds_between_updating_live_stream*1000*2
-      this.line_ref.current.chartInstance.update({preservation: true})
+      this.line_ref.current.options.scales.x.realtime.duration = x_axis_seconds*1000
+      this.line_ref.current.update('preservation')
     }
   }
 
-  woc = (key: string, value: number|string) => {
+  woc = (key, value) => {
     const { label } = this.props
-    if ((!isNaN(value)) && (value != "")) {
+    if ((!isNaN(value)) && (value !== "")) {
       this.props.settingsSocket.send(JSON.stringify({key: key, value: value, label: label}))
     }
   }

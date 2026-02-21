@@ -1,4 +1,5 @@
-from sanic import Sanic, response
+from sanic import Sanic
+from sanic.response import json, file, raw, text
 from json import dumps, loads, load, dump
 from asyncio import sleep as asleep
 from time import time
@@ -6,6 +7,8 @@ from datetime import datetime
 from io import BytesIO
 import bme680
 import pandas as pd
+
+# MIMIC SENSOR DATA. Set to False to use real sensor data, True to use fake data. Useful for testing on non-raspberry pi machines.
 skip_bme = True
 
 if not skip_bme:
@@ -86,7 +89,7 @@ async def consumer(mesmes, ws):
 @app.websocket('/ws_settings')
 async def new_settings(request, ws):
     await ws.send(dumps(status))  # return new status to server
-    async for message in ws:  # consume incomming requests for settings changes
+    async for message in ws:
         await consumer(message, ws)
 
 
@@ -99,26 +102,24 @@ async def historic_json(request, what, start, end):
         df = df[['date', what]]
         df = df[(df['date'] > datetime.fromisoformat(start)) & (df['date'] < datetime.fromisoformat(end))]
         df.columns = ['x', 'y']
-        return response.json(df.to_json(orient='records'))
+        return json(df.to_json(orient='records'))
     else:
-        return response.json(dumps({'error':f'no such things as {what}'}))
+        return json({'error':f'no such things as {what}'})
 
 
 @app.route('all_data')
 async def download_all_data(request):
-    return await response.file('data.log', filename='data.log')
-    ## hmm..data log is in a weird non standard format
-    #the following code is kinda slow but converts it to an excel file.
+    return await file('data.log', filename='data.log')
+    # The following code converts to Excel file in memory
     with open('data.log') as logfile:
         df = pd.DataFrame([loads(line) for line in logfile])
     df['date'] = pd.to_datetime(df['date'])
-    # gonna write an excel file to memory
     bio = BytesIO()
     writer = pd.ExcelWriter(bio, engine='xlsxwriter')
     df.to_excel(writer, sheet_name='Sheet1')
-    writer.save()
+    writer.close()
     bio.seek(0)
-    return response.raw(bio.read())
+    return raw(bio.read())
 
 
 @app.route('/<name:ext=xlsx>')
@@ -132,16 +133,14 @@ async def download_some_data(request, name, ext):
     if what in df.columns:
         df = df[['date', what]]
         df = df[(df['date'] > datetime.fromisoformat(start)) & (df['date'] < datetime.fromisoformat(end))]
-
-        # gonna write an excel file to memory
         bio = BytesIO()
         writer = pd.ExcelWriter(bio, engine='xlsxwriter')
         df.to_excel(writer, sheet_name='Sheet1')
-        writer.save()
+        writer.close()
         bio.seek(0)
-        return response.raw(bio.read())
+        return raw(bio.read())
     else:
-        return response.text("some sort of error...i'm too lazy to code this. Post an issue on github.")
+        return text("some sort of error...i'm too lazy to code this. Post an issue on github.")
 
 
 async def perform_measurement():
@@ -167,6 +166,11 @@ async def perform_measurement():
 
 
 async def polling():
+    # Ensure data.log exists
+    try:
+        open('data.log', 'x').close()
+    except FileExistsError:
+        pass
     while True:
         wait_time = int(status['seconds_between_storing_measurements'])
         await asleep(wait_time)
@@ -182,4 +186,4 @@ async def polling():
 app.add_task(polling())
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
+    app.run(host="0.0.0.0", port=8000, dev=True)
