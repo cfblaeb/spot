@@ -1,0 +1,13 @@
+[Unit]
+Description=BME680 Dash Webserver
+After=network.target
+
+[Service]
+User=laeb
+WorkingDirectory=/home/laeb/spot
+ExecStart=/home/laeb/venv/bin/python /home/laeb/spot/dashboard.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

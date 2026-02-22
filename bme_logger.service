@@ -1,0 +1,17 @@
+[Unit]
+Description=BME680 Sensor Logger
+After=network.target
+
+[Service]
+# Kør som din normale bruger
+User=laeb
+# Mappen hvor filerne og databasen ligger
+WorkingDirectory=/home/laeb/spot
+# Brug Python direkte fra dit virtuelle miljø
+ExecStart=/home/laeb/venv/bin/python /home/laeb/spot/logger.py
+# Genstart automatisk hvis scriptet crasher (vent 10 sekunder)
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
