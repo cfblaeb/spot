@@ -58,11 +58,7 @@ export default class DTGraph extends Component {
 			const {label} = this.props
 			fetch("/historic_json/" + label + "/" + start_time + "/" + end_time)
 				.then(r => r.json())
-				.then(data => {
-					// Convert x (date string) to Date object in UTC
-					let fixedData = JSON.parse(data).map(d => ({...d, x: new Date(d.x + 'Z')}))
-					this.setState({visible_data: fixedData})
-				})
+				.then(data => this.setState({visible_data: JSON.parse(data)}))
 				.catch(e => console.log(e))
 		}
 	}
