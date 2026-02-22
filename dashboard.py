@@ -68,7 +68,7 @@ app.layout = html.Div(style={'fontFamily': 'sans-serif', 'maxWidth': '1000px', '
     ]),
 
     # Temp, fugt og tryk
-    html.Div(dcc.Graph(id='temp-hum-graph'), style={'backgroundColor': 'white', 'marginBottom': '20px', 'borderRadius': '8px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'}),
+    html.Div(dcc.Graph(id='temp-graph'), style={'backgroundColor': 'white', 'marginBottom': '20px', 'borderRadius': '8px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'}),
     html.Div(dcc.Graph(id='hum-graph'), style={'backgroundColor': 'white', 'marginBottom': '20px', 'borderRadius': '8px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'}),
     html.Div(dcc.Graph(id='pressure-graph'), style={'backgroundColor': 'white', 'marginBottom': '20px', 'borderRadius': '8px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'})
 ])
