@@ -8,7 +8,7 @@ export default class DTGraph extends Component {
     this.state = {
       visible_data: [],
       start_time: (new Date(Date.now() - 1000 * 60 * 60 * 24 * 30)).toISOString().substring(0, 10),
-      end_time: (new Date).toISOString().substring(0, 10),
+      end_time: (new Date(Date.now() + 1000 * 60 * 60 * 24)).toISOString().substring(0, 10),
       graph_options: {
         plugins: {
           streaming: false,
@@ -18,6 +18,14 @@ export default class DTGraph extends Component {
         scales: {
           x: {
             type: "time",
+            time: {
+              displayFormats: {
+                day: 'MMM d',
+                hour: 'HH:mm',
+                minute: 'HH:mm',
+                second: 'HH:mm:ss',
+              }
+            }
           },
           y: {
             position: "right",

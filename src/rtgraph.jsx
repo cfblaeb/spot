@@ -24,6 +24,13 @@ export default class RTGraph extends Component {
             },
             ticks: {
               maxRotation: 0,
+            },
+            time: {
+              displayFormats: {
+                hour: 'HH:mm',
+                minute: 'HH:mm',
+                second: 'HH:mm:ss',
+              }
             }
           },
           y: {
