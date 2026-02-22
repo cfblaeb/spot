@@ -8,7 +8,10 @@ from io import BytesIO
 import bme680
 import pandas as pd
 
-# MIMIC SENSOR DATA. Set to False to use real sensor data, True to use fake data. Useful for testing on non-raspberry pi machines.
+# MIMIC SENSOR DATA.
+# Set to False to use real sensor data,
+# True to use fake data.
+# Use during dev without actual access to the BME680 chip.
 skip_bme = False
 
 if not skip_bme:
@@ -101,8 +104,23 @@ async def new_settings(request, ws):
 
 @app.route('/historic_json/<what>/<start>/<end>')
 async def historic_json(request, what, start, end):
-    with open('data.log') as logfile:
-        df = pd.DataFrame([loads(line) for line in logfile])
+    try:
+        with open('data.log') as logfile:
+            data = []
+            for line in logfile:
+                line = line.replace('\x00', '').strip()
+                if line:
+                    try:
+                        data.append(loads(line))
+                    except ValueError:
+                        continue
+            df = pd.DataFrame(data)
+    except FileNotFoundError:
+        return json({'error': 'data.log not found'})
+
+    if df.empty:
+        return json([])
+
     df['date'] = pd.to_datetime(df['date'])
     if what in df.columns:
         df = df[['date', what]]
@@ -117,8 +135,23 @@ async def historic_json(request, what, start, end):
 async def download_all_data(request):
     return await file('data.log', filename='data.log')
     # The following code converts to Excel file in memory
-    with open('data.log') as logfile:
-        df = pd.DataFrame([loads(line) for line in logfile])
+    try:
+        with open('data.log') as logfile:
+            data = []
+            for line in logfile:
+                line = line.replace('\x00', '').strip()
+                if line:
+                    try:
+                        data.append(loads(line))
+                    except ValueError:
+                        continue
+            df = pd.DataFrame(data)
+    except FileNotFoundError:
+        return text("data.log not found")
+
+    if df.empty:
+        return text("No data available")
+
     df['date'] = pd.to_datetime(df['date'])
     bio = BytesIO()
     writer = pd.ExcelWriter(bio, engine='xlsxwriter')
@@ -130,11 +163,29 @@ async def download_all_data(request):
 
 @app.route('/<name:ext=xlsx>')
 async def download_some_data(request, name, ext):
-    what, start, end = name.split("_")
+    try:
+        what, start, end = name.split("_")
+    except ValueError:
+        return text("Invalid filename format. Expected what_start_end.xlsx")
     print(name, ext)
     print(what, start, end)
-    with open('data.log') as logfile:
-        df = pd.DataFrame([loads(line) for line in logfile])
+    try:
+        with open('data.log') as logfile:
+            data = []
+            for line in logfile:
+                line = line.replace('\x00', '').strip()
+                if line:
+                    try:
+                        data.append(loads(line))
+                    except ValueError:
+                        continue
+            df = pd.DataFrame(data)
+    except FileNotFoundError:
+        return text("data.log not found")
+
+    if df.empty:
+        return text("No data available")
+
     df['date'] = pd.to_datetime(df['date'])
     if what in df.columns:
         df = df[['date', what]]
@@ -160,15 +211,21 @@ async def perform_measurement():
             'ts': time(),
             'date': str(datetime.now())
         }
-    elif sensor.get_sensor_data() and sensor.data.heat_stable:
-        measurement = {
-            'temperature': sensor.data.temperature,
-            'pressure': sensor.data.pressure,
-            'humidity': sensor.data.humidity,
-            'gas': sensor.data.gas_resistance,
-            'ts': time(),
-            'date': str(datetime.now())
-        }
+    else:
+        try:
+            if sensor.get_sensor_data() and sensor.data.heat_stable:
+                measurement = {
+                    'temperature': sensor.data.temperature,
+                    'pressure': sensor.data.pressure,
+                    'humidity': sensor.data.humidity,
+                    'gas': sensor.data.gas_resistance,
+                    'ts': time(),
+                    'date': str(datetime.now())
+                }
+            else:
+                print("Sensor data not ready or heat not stable")
+        except Exception as e:
+            print(f"Error performing measurement: {e}")
 
 
 async def polling():
@@ -184,9 +241,10 @@ async def polling():
         new_enough = wait_time/10  # new enough is 1/10th of wait time
         if "ts" not in measurement or measurement['ts']+new_enough < time():
             await perform_measurement()
-        with open('data.log', 'a') as logfile:
-            logfile.write(dumps(measurement))
-            logfile.write("\n")
+        if measurement:
+            with open('data.log', 'a') as logfile:
+                logfile.write(dumps(measurement))
+                logfile.write("\n")
 
 
 app.add_task(polling())
