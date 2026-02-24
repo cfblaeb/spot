@@ -11,9 +11,9 @@ I didn't want to solder anything so I bought:
   - This is a clever little thing that makes it easy to connect "Breakout" boards to a Raspberry.
 
 # Software
-## I stopped updating the sanic/chartjs and started a plotly-dashboard version in the "spot2" folder
-The tricky thing is that it depends on the bosch bsec library which I'm not allowed to distribute.
-The bosch bsec library in turn depends on https://github.com/alexh-name/bsec_bme680_linux to work on pi zero
+## I stopped updating the sanic/chartjs and started a plotly-dashboard version. The old code is in the "old_spot" folder
+The tricky thing is that the new codedepends on the bosch bsec library which I'm not allowed to distribute.
+The bosch bsec library in turn depends on https://github.com/mcalisterkm/bme68x-python-library-bsec2.6.1.0 to work on pi zero
 Anyway, get that into a venv and you're good to go.
 
 ## Server-side

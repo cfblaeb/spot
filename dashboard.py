@@ -37,7 +37,7 @@ def get_traffic_light(accuracy):
 
 # --- Frontend Layout ---
 app.layout = html.Div(style={'fontFamily': 'sans-serif', 'maxWidth': '1000px', 'margin': '0 auto', 'padding': '20px'}, children=[
-    
+
     html.Div(style={'backgroundColor': 'white', 'padding': '20px', 'borderRadius': '8px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)', 'textAlign': 'center', 'marginBottom': '20px'}, children=[
         html.H1("🌬️ Indeklima DRAMA"),
         html.Label("Vælg tidsperiode: ", style={'fontSize': '18px', 'marginRight': '10px'}),
@@ -88,14 +88,13 @@ def update_graphs(days):
     cutoff_date = datetime.utcnow() - timedelta(days=days)
 
     conn = sqlite3.connect(DB_FILE)
-    # HUSK AT HENTE 'accuracy' FRA DATABASEN!
     query = "SELECT timestamp, temperature, humidity, pressure, iaq, eco2, accuracy FROM sensor_data WHERE timestamp >= ? ORDER BY timestamp ASC"
     df = pd.read_sql_query(query, conn, params=(cutoff_date.strftime('%Y-%m-%d %H:%M:%S'),))
     conn.close()
 
     if df.empty:
         empty_light = get_traffic_light(None)
-        return go.Figure(), go.Figure(), go.Figure(), go.Figure(), empty_light, empty_light
+        return go.Figure(), go.Figure(), go.Figure(), go.Figure(), go.Figure(), empty_light, empty_light
 
     # Ret tidszonen til dansk tid
     df['timestamp'] = pd.to_datetime(df['timestamp'])
@@ -105,23 +104,23 @@ def update_graphs(days):
     latest_accuracy = df['accuracy'].iloc[-1]
     traffic_light_html = get_traffic_light(latest_accuracy)
 
-    # 1. IAQ Graf
-    fig_iaq = go.Figure(go.Scatter(x=df['timestamp'], y=df['iaq'], mode='lines', name='IAQ', line=dict(color='#ff4b4b'), fill='tozeroy'))
+    # 1. IAQ Graf (Removed fill='tozeroy' to auto-scale Y-axis)
+    fig_iaq = go.Figure(go.Scatter(x=df['timestamp'], y=df['iaq'], mode='lines', name='IAQ', line=dict(color='#ff4b4b')))
     fig_iaq.update_layout(title='Indendørs Luftkvalitet (IAQ)', margin=dict(l=20, r=20, t=40, b=20), template='plotly_white')
 
-    # 2. eCO2 Graf
-    fig_eco2 = go.Figure(go.Scatter(x=df['timestamp'], y=df['eco2'], mode='lines', name='eCO2 (ppm)', line=dict(color='#00cc66'), fill='tozeroy'))
+    # 2. eCO2 Graf (Removed fill='tozeroy' to auto-scale Y-axis)
+    fig_eco2 = go.Figure(go.Scatter(x=df['timestamp'], y=df['eco2'], mode='lines', name='eCO2 (ppm)', line=dict(color='#00cc66')))
     fig_eco2.update_layout(title='Estimeret CO2 (ppm)', margin=dict(l=20, r=20, t=40, b=20), template='plotly_white')
 
-    # 3. Temperatur og Fugtighed
-    fig_temp = go.Figure(go.Scatter(x=df['timestamp'], y=df['temperature'], mode='lines', name='Temp (°C)', line=dict(color='#ff9f36'), fill='tozeroy'))
+    # 3. Temperatur og Fugtighed (Removed fill='tozeroy' to auto-scale Y-axis)
+    fig_temp = go.Figure(go.Scatter(x=df['timestamp'], y=df['temperature'], mode='lines', name='Temp (°C)', line=dict(color='#ff9f36')))
     fig_temp.update_layout(title='Temperatur (°C)', margin=dict(l=20, r=20, t=40, b=20), template='plotly_white')
 
-    fig_hum = go.Figure(go.Scatter(x=df['timestamp'], y=df['humidity'], mode='lines', name='Fugtighed (%)', line=dict(color='#1f77b4'), fill='tozeroy'))
+    fig_hum = go.Figure(go.Scatter(x=df['timestamp'], y=df['humidity'], mode='lines', name='Fugtighed (%)', line=dict(color='#1f77b4')))
     fig_hum.update_layout(title='Fugtighed (%)', margin=dict(l=20, r=20, t=40, b=20), template='plotly_white')
 
-    # 4. Tryk Graf
-    fig_pressure = go.Figure(go.Scatter(x=df['timestamp'], y=df['pressure'], mode='lines', name='Tryk (hPa)', line=dict(color='#8c564b'), fill='tozeroy'))
+    # 4. Tryk Graf (Removed fill='tozeroy' to auto-scale Y-axis)
+    fig_pressure = go.Figure(go.Scatter(x=df['timestamp'], y=df['pressure'], mode='lines', name='Tryk (hPa)', line=dict(color='#8c564b')))
     fig_pressure.update_layout(title='Atmosfærisk Tryk (hPa)', margin=dict(l=20, r=20, t=40, b=20), template='plotly_white')
 
     # Returner grafer OG traffiklys
