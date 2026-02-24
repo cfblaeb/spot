@@ -104,22 +104,40 @@ def update_graphs(days):
     latest_accuracy = df['accuracy'].iloc[-1]
     traffic_light_html = get_traffic_light(latest_accuracy)
 
-    # 1. IAQ Graf (Removed fill='tozeroy' to auto-scale Y-axis)
-    fig_iaq = go.Figure(go.Scatter(x=df['timestamp'], y=df['iaq'], mode='lines', name='IAQ', line=dict(color='#ff4b4b')))
+    # ==========================================
+    # 1. IAQ Graf med faste farvebånd
+    # ==========================================
+    fig_iaq = go.Figure(go.Scatter(x=df['timestamp'], y=df['iaq'], mode='lines', name='IAQ', line=dict(color='black', width=2)))
+
+    # Fastlås Y-aksen fra 0 til 300
+    fig_iaq.update_yaxes(range=[0, 300])
     fig_iaq.update_layout(title='Indendørs Luftkvalitet (IAQ)', margin=dict(l=20, r=20, t=40, b=20), template='plotly_white')
 
-    # 2. eCO2 Graf (Removed fill='tozeroy' to auto-scale Y-axis)
+    # Tilføj farvede zoner for at gøre det intuitivt
+    fig_iaq.add_hrect(y0=0, y1=50, line_width=0, fillcolor="#00cc66", opacity=0.15, annotation_text="Fremragende (0-50)", annotation_position="inside top left")
+    fig_iaq.add_hrect(y0=50, y1=100, line_width=0, fillcolor="#99cc00", opacity=0.15, annotation_text="God (50-100)", annotation_position="inside top left")
+    fig_iaq.add_hrect(y0=100, y1=150, line_width=0, fillcolor="#ffcc00", opacity=0.15, annotation_text="Let forurenet (100-150)", annotation_position="inside top left")
+    fig_iaq.add_hrect(y0=150, y1=200, line_width=0, fillcolor="#ff9900", opacity=0.15, annotation_text="Dårlig (150-200)", annotation_position="inside top left")
+    fig_iaq.add_hrect(y0=200, y1=300, line_width=0, fillcolor="#ff4b4b", opacity=0.15, annotation_text="Meget dårlig (200+)", annotation_position="inside top left")
+
+    # ==========================================
+    # 2. eCO2 Graf
+    # ==========================================
     fig_eco2 = go.Figure(go.Scatter(x=df['timestamp'], y=df['eco2'], mode='lines', name='eCO2 (ppm)', line=dict(color='#00cc66')))
     fig_eco2.update_layout(title='Estimeret CO2 (ppm)', margin=dict(l=20, r=20, t=40, b=20), template='plotly_white')
 
-    # 3. Temperatur og Fugtighed (Removed fill='tozeroy' to auto-scale Y-axis)
+    # ==========================================
+    # 3. Temperatur og Fugtighed
+    # ==========================================
     fig_temp = go.Figure(go.Scatter(x=df['timestamp'], y=df['temperature'], mode='lines', name='Temp (°C)', line=dict(color='#ff9f36')))
     fig_temp.update_layout(title='Temperatur (°C)', margin=dict(l=20, r=20, t=40, b=20), template='plotly_white')
 
     fig_hum = go.Figure(go.Scatter(x=df['timestamp'], y=df['humidity'], mode='lines', name='Fugtighed (%)', line=dict(color='#1f77b4')))
     fig_hum.update_layout(title='Fugtighed (%)', margin=dict(l=20, r=20, t=40, b=20), template='plotly_white')
 
-    # 4. Tryk Graf (Removed fill='tozeroy' to auto-scale Y-axis)
+    # ==========================================
+    # 4. Tryk Graf
+    # ==========================================
     fig_pressure = go.Figure(go.Scatter(x=df['timestamp'], y=df['pressure'], mode='lines', name='Tryk (hPa)', line=dict(color='#8c564b')))
     fig_pressure.update_layout(title='Atmosfærisk Tryk (hPa)', margin=dict(l=20, r=20, t=40, b=20), template='plotly_white')
 
